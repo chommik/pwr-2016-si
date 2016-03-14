@@ -4,6 +4,8 @@ import random
 
 from typing import TypeVar, List
 
+import numpy
+
 MODE_GREATER = 1
 MODE_LOWER = 2
 
@@ -29,7 +31,7 @@ class Problem:
     def increment_step(self) -> int:
         raise NotImplementedError
 
-    def should_stop(self) -> bool:
+    def should_stop(self, population) -> bool:
         raise NotImplementedError
 
 
@@ -58,19 +60,19 @@ class GeneticAlgorithm:
             if max_fitness is None or fitness > max_fitness:
                 max_fitness = fitness
 
-        logging.info("Generation %d/%d: Fitness: min = %d,\t max = %d,\t avg = %f",
+        logging.info("Generation %d/%d: Fitness: min = %d,\t max = %d,\t avg = %f,\t std = %f",
                      self.generation, self.max_iterations,
-                     min_fitness, max_fitness, total_fitness / len(self.population))
+                     min_fitness, max_fitness, total_fitness / len(self.population), numpy.std(self.population))
 
     def lets_rumble(self):
         logging.info("Let's rumble!")
 
         self.population = self.problem.initialise(self.population_size)
 
-        while not (self.problem.should_stop() or self.generation >= self.max_iterations):
+        while not (self.problem.should_stop(self.population) or self.generation >= self.max_iterations):
             self.generation = self.problem.increment_step()
 
-            new_population = []
+            new_population = list()
             while len(new_population) < self.population_size:
 
                 # Crossover?
@@ -85,6 +87,7 @@ class GeneticAlgorithm:
 
                 # Mutate?
                 if random.random() < self.mutation_chance:
+                    # Yes.
                     new_item = self.problem.mutate(new_item)
 
                 new_population.append(new_item)
