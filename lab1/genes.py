@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 import logging
+import sys
 import genetic_algo
 import graph_problem
 
@@ -27,11 +28,14 @@ def main():
     params = get_parameters()
 
     graph_problem.load_graph("graphs/GEOM20.col", params.max_colours)
+    stats_output = open('stats.dat', 'w+')
 
     algo = genetic_algo.GeneticAlgorithm(graph_problem.GraphProblem(), params.population_size, params.iterations,
-                                         params.crossover_chance, params.mutation_chance)
-    algo.lets_rumble()
+                                         params.crossover_chance, params.mutation_chance, stats_output)
+    exit_code = algo.lets_rumble()
+    stats_output.close()
 
+    sys.exit(exit_code)
 
 if __name__ == "__main__":
     main()

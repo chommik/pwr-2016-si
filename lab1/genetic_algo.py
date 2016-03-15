@@ -2,7 +2,7 @@
 import logging
 import random
 
-from typing import TypeVar, List
+from typing import TypeVar, List, io
 
 import numpy
 
@@ -37,7 +37,8 @@ class Problem:
 
 class GeneticAlgorithm:
     def __init__(self, problem: Problem, population_size: int, max_iterations: int, crossover_chance: float,
-                 mutation_chance: float):
+                 mutation_chance: float, stats_output: io):
+        self.stats_output = stats_output
         self.mutation_chance = mutation_chance
         self.crossover_chance = crossover_chance
         self.max_iterations = max_iterations
@@ -63,6 +64,8 @@ class GeneticAlgorithm:
         logging.info("Generation %d/%d: Fitness: min = %d,\t max = %d,\t avg = %f,\t std = %f",
                      self.generation, self.max_iterations,
                      min_fitness, max_fitness, total_fitness / len(self.population), numpy.std(self.population))
+
+        print("%d:%d:%d:%f" % (self.generation, min_fitness, max_fitness, total_fitness / len(self.population)), file=self.stats_output)
 
     def lets_rumble(self):
         logging.info("Let's rumble!")
@@ -95,3 +98,8 @@ class GeneticAlgorithm:
             self.population = new_population
             self.show_stats()
 
+        if not self.problem.should_stop(self.population):
+            logging.warning("Did not found a good solution.")
+            return 1
+
+        return 0

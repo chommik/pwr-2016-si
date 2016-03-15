@@ -39,7 +39,7 @@ def load_graph(file_name: str, _max_colours: int) -> None:
 
 class GraphItem(object):
     colouring = []
-    unfitness = None
+    fitness = None
 
     def __getitem__(self, item):
         return self.colouring[item]
@@ -69,7 +69,24 @@ class GraphProblem(Problem):
         )
 
     def should_stop(self, population) -> bool:
-        return any(self.fitness_for(item) == 0 for item in population)
+        for item in population:
+            failed_constraints = 0
+            for edge in edges:
+                from_vert, to_vert, min_distance = edge
+                vert1_colour, vert2_colour = item[from_vert], item[to_vert]
+
+                if from_vert == to_vert:
+                    continue
+
+                if abs(vert1_colour - vert2_colour) < min_distance:
+                    failed_constraints += 1
+
+            if failed_constraints == 0:
+                logging.info("Found a solution.")
+                return True
+
+        logging.info("Failed constraints: %d", failed_constraints)
+        return False
 
     def mutate(self, item: GraphItem) -> GraphItem:
         which_vertex = random.randrange(0, len(item))
@@ -81,7 +98,7 @@ class GraphProblem(Problem):
         return GraphItem(new_colouring)
 
     def select_item(self, population: List[GraphItem]) -> GraphItem:
-        some_items = [random.choice(population) for _ in range(10)]
+        some_items = [random.choice(population) for _ in range(5)]
         return max(some_items, key=lambda item: self.fitness_for(item))
 
     def increment_step(self) -> int:
@@ -95,19 +112,22 @@ class GraphProblem(Problem):
         return list(random_colouring() for _ in range(population_size))
 
     def fitness_for(self, item: GraphItem) -> int:
-        if item.unfitness is None:
-            unfitness = 0
+        if item.fitness is None:
+            fitness = 0
 
             for edge in edges:
                 from_vert, to_vert, min_distance = edge
+
+                if from_vert == to_vert:
+                    continue
+
                 vert1_colour, vert2_colour = item[from_vert], item[to_vert]
-
                 colour_distance = abs(vert1_colour - vert2_colour)
-                if colour_distance < min_distance:
-                    unfitness -= colour_distance
+                if colour_distance > min_distance:
+                    fitness += 1
 
-            item.unfitness = unfitness
+            item.fitness = fitness
         else:
-            unfitness = item.unfitness
+            fitness = item.fitness
 
-        return unfitness
+        return fitness
