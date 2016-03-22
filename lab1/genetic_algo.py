@@ -5,7 +5,7 @@ import random
 
 from typing import TypeVar, List, io
 
-import numpy
+#from numpy import std
 
 MODE_GREATER = 1
 MODE_LOWER = 2
@@ -55,9 +55,9 @@ class GeneticAlgorithm:
     def show_stats(self):
         max_fitness, min_fitness, total_fitness = self.get_fitness_stats()
 
-        logging.info("Generation %d/%d: Fitness: min = %d,\t max = %d,\t avg = %f,\t std = %f",
+        logging.info("Generation %d/%d: Fitness: min = %d,\t max = %d,\t avg = %f,\t std = DISABLED",
                      self.generation, self.max_iterations,
-                     min_fitness, max_fitness, total_fitness / len(self.population), numpy.std(self.population))
+                     min_fitness, max_fitness, total_fitness / len(self.population))
 
         print("%d:%d:%d:%f" % (self.generation, min_fitness, max_fitness, total_fitness / len(self.population)), file=self.graph_output)
 
@@ -68,9 +68,12 @@ class GeneticAlgorithm:
         problem_stats = self.problem.get_stats()
         algo_stats = [
             self.max_iterations,
+            self.generation,
             len(self.population),
             max_fitness,
             avg_fitness,
+            self.crossover_chance,
+            self.mutation_chance,
             os.getpid(),
         ]
 

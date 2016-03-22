@@ -4,8 +4,6 @@ from math import sqrt
 import random
 
 from typing import List
-import numpy
-import scipy.stats
 from genetic_algo import Problem
 
 graph_file = None
@@ -82,7 +80,7 @@ class GraphProblem(Problem):
 
     def should_stop(self, population) -> bool:
         for item in population:
-            self.failed_constraints = 0
+            failed_constraints = 0
             for edge in edges:
                 from_vert, to_vert, min_distance = edge
                 vert1_colour, vert2_colour = item[from_vert], item[to_vert]
@@ -91,9 +89,10 @@ class GraphProblem(Problem):
                     continue
 
                 if abs(vert1_colour - vert2_colour) < min_distance:
-                    self.failed_constraints += 1
+                    failed_constraints += 1
 
-            if self.failed_constraints == 0:
+            self.failed_constraints = failed_constraints
+            if failed_constraints == 0:
                 logging.info("Found a solution.")
                 return True
 
@@ -102,7 +101,6 @@ class GraphProblem(Problem):
 
     def mutate(self, item: GraphItem, mutation_chance: float) -> GraphItem:
         which_vertex = random.randrange(0, len(item))
-
 
         new_colouring = list(item.colouring)
 

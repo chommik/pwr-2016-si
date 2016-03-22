@@ -9,7 +9,7 @@ import graph_problem
 
 def setup_logging():
     log_format = "{asctime} {levelname:8} {threadName:<15} [{module}:{lineno}] {message}"
-    logging.basicConfig(format=log_format, style="{", level=logging.INFO)
+    logging.basicConfig(format=log_format, style="{", level=logging.ERROR)
 
 def get_parameters():
     parser = argparse.ArgumentParser('genes.py')
