@@ -51,7 +51,7 @@ class GraphItem(object):
         return len(self.colouring)
 
     def __init__(self, colouring):
-        self.colouring = tuple(colouring)
+        self.colouring = colouring
 
 
 def random_colouring() -> GraphItem:
@@ -88,12 +88,15 @@ class GraphProblem(Problem):
         logging.info("Failed constraints: %d", failed_constraints)
         return False
 
-    def mutate(self, item: GraphItem) -> GraphItem:
+    def mutate(self, item: GraphItem, mutation_chance: float) -> GraphItem:
         which_vertex = random.randrange(0, len(item))
-        new_value = random.randrange(0, colours_count + 1)
+
 
         new_colouring = list(item.colouring)
-        new_colouring[which_vertex] = new_value
+
+        for vertex in range(len(new_colouring)):
+            if random.random() < mutation_chance:
+                new_colouring[vertex] = random.randrange(0, colours_count + 1)
 
         return GraphItem(new_colouring)
 

@@ -4,7 +4,7 @@
 
 set datafile separator ":"
 
-set term qt size 1280,400
+set term png size 1280,600
 
 plot "stats.dat" using 1:2 title 'min fitness' with lines, \
       "stats.dat" using 1:3 title 'max fitness' with lines, \

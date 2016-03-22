@@ -25,7 +25,7 @@ class Problem:
     def crossover(self, item1: T, item2: T) -> T:
         raise NotImplementedError
 
-    def mutate(self, item: T) -> T:
+    def mutate(self, item: T, mutation_chance: float) -> T:
         raise NotImplementedError
 
     def increment_step(self) -> int:
@@ -88,10 +88,7 @@ class GeneticAlgorithm:
                     # Nope.
                     new_item = self.problem.select_item(self.population)
 
-                # Mutate?
-                if random.random() < self.mutation_chance:
-                    # Yes.
-                    new_item = self.problem.mutate(new_item)
+                new_item = self.problem.mutate(new_item, self.mutation_chance)
 
                 new_population.append(new_item)
 

@@ -8,7 +8,7 @@ import graph_problem
 
 def setup_logging():
     log_format = "{asctime} {levelname:8} {threadName:<15} [{module}:{lineno}] {message}"
-    logging.basicConfig(format=log_format, style="{", level=logging.DEBUG)
+    logging.basicConfig(format=log_format, style="{", level=logging.INFO)
 
 def get_parameters():
     parser = argparse.ArgumentParser('genes.py')
@@ -19,9 +19,10 @@ def get_parameters():
     parser.add_argument('--population-size', type=int, required=True)
 
     parser.add_argument('--crossover-chance', type=float, required=True)
-    parser.add_argument('--mutation-chance', type=float, required=False)
+    parser.add_argument('--mutation-chance', type=float, required=True)
 
     return parser.parse_args()
+
 
 def main():
     setup_logging()
