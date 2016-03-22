@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 import random
 
 from typing import TypeVar, List, io
@@ -34,11 +35,15 @@ class Problem:
     def should_stop(self, population) -> bool:
         raise NotImplementedError
 
+    def get_stats(self) -> list:
+        raise NotImplementedError
+
 
 class GeneticAlgorithm:
     def __init__(self, problem: Problem, population_size: int, max_iterations: int, crossover_chance: float,
-                 mutation_chance: float, stats_output: io):
+                 mutation_chance: float, graph_output: io, stats_output: io):
         self.stats_output = stats_output
+        self.graph_output = graph_output
         self.mutation_chance = mutation_chance
         self.crossover_chance = crossover_chance
         self.max_iterations = max_iterations
@@ -48,10 +53,36 @@ class GeneticAlgorithm:
         self.population = []
 
     def show_stats(self):
+        max_fitness, min_fitness, total_fitness = self.get_fitness_stats()
+
+        logging.info("Generation %d/%d: Fitness: min = %d,\t max = %d,\t avg = %f,\t std = %f",
+                     self.generation, self.max_iterations,
+                     min_fitness, max_fitness, total_fitness / len(self.population), numpy.std(self.population))
+
+        print("%d:%d:%d:%f" % (self.generation, min_fitness, max_fitness, total_fitness / len(self.population)), file=self.graph_output)
+
+    def print_overall_stats(self, output=None):
+        max_fitness, min_fitness, total_fitness = self.get_fitness_stats()
+        avg_fitness = total_fitness / len(self.population)
+
+        problem_stats = self.problem.get_stats()
+        algo_stats = [
+            self.max_iterations,
+            len(self.population),
+            max_fitness,
+            avg_fitness,
+            os.getpid(),
+        ]
+
+        if output is None:
+            output = self.stats_output
+
+        print(':'.join(str(item) for item in problem_stats + algo_stats), file=output)
+
+    def get_fitness_stats(self):
         total_fitness = 0
         max_fitness = None
         min_fitness = None
-
         for item in self.population:
             fitness = self.problem.fitness_for(item)
 
@@ -60,12 +91,7 @@ class GeneticAlgorithm:
                 min_fitness = fitness
             if max_fitness is None or fitness > max_fitness:
                 max_fitness = fitness
-
-        logging.info("Generation %d/%d: Fitness: min = %d,\t max = %d,\t avg = %f,\t std = %f",
-                     self.generation, self.max_iterations,
-                     min_fitness, max_fitness, total_fitness / len(self.population), numpy.std(self.population))
-
-        print("%d:%d:%d:%f" % (self.generation, min_fitness, max_fitness, total_fitness / len(self.population)), file=self.stats_output)
+        return max_fitness, min_fitness, total_fitness
 
     def lets_rumble(self):
         logging.info("Let's rumble!")
@@ -94,6 +120,8 @@ class GeneticAlgorithm:
 
             self.population = new_population
             self.show_stats()
+
+        self.print_overall_stats()
 
         if not self.problem.should_stop(self.population):
             logging.warning("Did not found a good solution.")

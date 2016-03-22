@@ -8,6 +8,7 @@ import numpy
 import scipy.stats
 from genetic_algo import Problem
 
+graph_file = None
 colours_count = -1
 vertex_count = -1
 edges = []
@@ -16,9 +17,10 @@ generation = 0
 
 
 def load_graph(file_name: str, _max_colours: int) -> None:
-    global vertex_count, colours_count
+    global vertex_count, colours_count, graph_file
 
     colours_count = _max_colours
+    graph_file = file_name
 
     logging.info("Loading graph from '%s'", file_name)
     with open(file_name) as input_file:
@@ -61,6 +63,16 @@ def random_colouring() -> GraphItem:
 
 
 class GraphProblem(Problem):
+
+    failed_constraints = None
+
+    def get_stats(self) -> list:
+        return [
+            graph_file,
+            colours_count,
+            self.failed_constraints,
+        ]
+
     def crossover(self, item1: GraphItem, item2: GraphItem) -> GraphItem:
         crossover_point = random.randrange(0, len(item1))
         # FIXME: brzydkie
@@ -70,7 +82,7 @@ class GraphProblem(Problem):
 
     def should_stop(self, population) -> bool:
         for item in population:
-            failed_constraints = 0
+            self.failed_constraints = 0
             for edge in edges:
                 from_vert, to_vert, min_distance = edge
                 vert1_colour, vert2_colour = item[from_vert], item[to_vert]
@@ -79,13 +91,13 @@ class GraphProblem(Problem):
                     continue
 
                 if abs(vert1_colour - vert2_colour) < min_distance:
-                    failed_constraints += 1
+                    self.failed_constraints += 1
 
-            if failed_constraints == 0:
+            if self.failed_constraints == 0:
                 logging.info("Found a solution.")
                 return True
 
-        logging.info("Failed constraints: %d", failed_constraints)
+        logging.info("Failed constraints: %d", self.failed_constraints)
         return False
 
     def mutate(self, item: GraphItem, mutation_chance: float) -> GraphItem:
