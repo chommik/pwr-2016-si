@@ -124,9 +124,10 @@ class GeneticAlgorithm:
             self.population = new_population
             self.show_stats()
 
+        last_result = self.problem.should_stop(self.population, quick_fail=False)
         self.print_overall_stats()
 
-        if not self.problem.should_stop(self.population):
+        if not last_result:
             logging.warning("Did not found a good solution.")
             return 1
 

@@ -9,7 +9,7 @@ import graph_problem
 
 def setup_logging():
     log_format = "{asctime} {levelname:8} {threadName:<15} [{module}:{lineno}] {message}"
-    logging.basicConfig(format=log_format, style="{", level=logging.ERROR)
+    logging.basicConfig(format=log_format, style="{", level=logging.INFO)
 
 def get_parameters():
     parser = argparse.ArgumentParser('genes.py')
@@ -31,7 +31,7 @@ def main():
 
     graph_problem.load_graph(params.graph_file, params.max_colours)
 
-    graph_output = open('graph-stats/%s-%d.dat' % (os.path.basename(params.graph_file), os.getpid()), 'w')
+    graph_output = open('graph.dat', 'w')
     stats_output = open('stats.dat', 'a')
 
     algo = genetic_algo.GeneticAlgorithm(graph_problem.GraphProblem(), params.population_size, params.iterations,

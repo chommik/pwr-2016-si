@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from math import sqrt
 import random
 
 from typing import List
@@ -38,8 +37,7 @@ def load_graph(file_name: str, _max_colours: int) -> None:
 
 
 class GraphItem(object):
-    colouring = []
-    fitness = None
+    __slots__ = ['colouring', 'fitness']
 
     def __getitem__(self, item):
         return self.colouring[item]
@@ -52,6 +50,7 @@ class GraphItem(object):
 
     def __init__(self, colouring):
         self.colouring = colouring
+        self.fitness = None
 
 
 def random_colouring() -> GraphItem:
@@ -78,18 +77,20 @@ class GraphProblem(Problem):
             item1.colouring[:crossover_point] + item2.colouring[crossover_point:]
         )
 
-    def should_stop(self, population) -> bool:
+    def should_stop(self, population, quick_fail=True) -> bool:
         for item in population:
             failed_constraints = 0
             for edge in edges:
                 from_vert, to_vert, min_distance = edge
-                vert1_colour, vert2_colour = item[from_vert], item[to_vert]
+                vert1_colour, vert2_colour = item.colouring[from_vert], item.colouring[to_vert]
 
                 if from_vert == to_vert:
                     continue
 
                 if abs(vert1_colour - vert2_colour) < min_distance:
                     failed_constraints += 1
+                    if quick_fail:
+                        return False
 
             self.failed_constraints = failed_constraints
             if failed_constraints == 0:
@@ -100,8 +101,6 @@ class GraphProblem(Problem):
         return False
 
     def mutate(self, item: GraphItem, mutation_chance: float) -> GraphItem:
-        which_vertex = random.randrange(0, len(item))
-
         new_colouring = list(item.colouring)
 
         for vertex in range(len(new_colouring)):
